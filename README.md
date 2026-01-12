@@ -1,1 +1,1 @@
-Repositorio para esritos interactivos.
+Repositorio para escritos interactivos.
