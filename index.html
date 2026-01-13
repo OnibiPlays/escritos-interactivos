@@ -184,6 +184,21 @@ let tiempoQuieto = 0;
 const TIEMPO_ESPERA = 1500; // ms quieto para revelar bloque
 let indexBloque = 0;
 let calmaActivada = false;
+let musicaListo = false;
+
+const musica = document.getElementById("musica");
+musica.volume = 0.05; // volumen bajo
+musica.preload = "auto";
+
+// Detectar interacción mínima para desbloquear audio
+function desbloquearMusica() {
+  musicaListo = true;
+  window.removeEventListener('scroll', desbloquearMusica);
+  window.removeEventListener('click', desbloquearMusica);
+}
+
+window.addEventListener('scroll', desbloquearMusica);
+window.addEventListener('click', desbloquearMusica);
 
 function mostrarBloque(bloque) {
   bloque.style.opacity = 1;
@@ -191,6 +206,8 @@ function mostrarBloque(bloque) {
 
 function checkSilencio() {
   const scrollActual = window.scrollY;
+  
+  // Si no nos movemos, aumentamos tiempo quieto
   if (Math.abs(scrollActual - ultimaPos) < 1) {
     tiempoQuieto += 100;
   } else {
@@ -198,12 +215,14 @@ function checkSilencio() {
   }
   ultimaPos = scrollActual;
 
+  // Mostrar siguiente bloque si hemos estado quietos
   if (tiempoQuieto >= TIEMPO_ESPERA && indexBloque < bloques.length) {
     mostrarBloque(bloques[indexBloque]);
     indexBloque++;
     tiempoQuieto = 0;
   }
 
+  // Activar calma final
   if (!calmaActivada && indexBloque >= bloques.length) {
     const scrollPos = window.innerHeight + window.scrollY;
     const limite = document.body.offsetHeight - 10;
@@ -211,14 +230,15 @@ function checkSilencio() {
       document.body.classList.add("calma");
       calmaActivada = true;
 
-      // Reproducir música de fondo suavemente
-      const musica = document.getElementById("musica");
-      musica.volume = 0.05; 
-      musica.play().catch(e => console.log("Autoplay bloqueado:", e));
+      // Reproducir música solo si se desbloqueó por scroll/click
+      if (musicaListo) {
+        musica.play().catch(e => console.log("Autoplay bloqueado:", e));
+      }
     }
   }
 }
 
+// Revisamos cada 100ms
 setInterval(checkSilencio, 100);
 </script>
 </body>
